@@ -24,9 +24,14 @@ import prompts from "prompts";
 import ora from "ora";
 import { LastSeen } from "./entities/LastSeen";
 import os from "os";
+import fs from "fs";
+
+const packageJson = JSON.parse(fs.readFileSync("package.json").toString());
 
 async function main() {
     console.log(ASCII);
+
+    console.log(`whisper version ${packageJson.version}`);
 
     // get db conn
     const connection = await createConnection({
