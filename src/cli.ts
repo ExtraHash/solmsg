@@ -23,6 +23,7 @@ import { Whisper } from "./entities/Whisper";
 import prompts from "prompts";
 import ora from "ora";
 import { LastSeen } from "./entities/LastSeen";
+import os from "os";
 
 async function main() {
     console.log(ASCII);
@@ -30,7 +31,7 @@ async function main() {
     // get db conn
     const connection = await createConnection({
         type: "sqlite",
-        database: "sqlite.db",
+        database: path.resolve(os.homedir(), ".solwhisper", "sqlite.db"),
         entities: [path.resolve(__dirname, "entities/*{.ts,.js}")],
         synchronize: true,
     });
