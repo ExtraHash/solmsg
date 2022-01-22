@@ -1,17 +1,18 @@
 {
-    "name": "ts_boilerplate",
+    "name": "solwhisper",
     "version": "0.1.0",
-    "description": "Quick start for typescript projects",
-    "main": "./dist/index.js",
+    "description": "e2e messaging on the solana blockchain",
+    "main": "./dist/cli.js",
     "author": "Extra <extrahash@protonmail.com>",
     "license": "GPL-3.0",
     "private": false,
     "scripts": {
-        "start": "node ./dist/index.js",
+        "start": "node ./dist/cli.js",
         "build": "node ./node_modules/typescript/bin/tsc",
         "format": "node ./node_modules/prettier/bin-prettier.js '**/*.{ts,tsx,json,md}' --tab-width 4 --trailing-comma es5 --ignore-path .gitignore  --arrow-parens always --write",
         "lint": "./node_modules/tslint/bin/tslint src/**/*.ts{,x}",
-        "lint-fix": "./node_modules/tslint/bin/tslint src/**/*.ts{,x} --fix"
+        "lint-fix": "./node_modules/tslint/bin/tslint src/**/*.ts{,x} --fix",
+        "prepack": "yarn build"
     },
     "devDependencies": {
         "@types/ed2curve": "^0.2.2",
@@ -49,5 +50,6 @@
         "sqlite3": "^5.0.2",
         "tweetnacl": "^1.0.3",
         "typeorm": "^0.2.41"
-    }
+    },
+    "bin": "./dist/cli.js"
 }

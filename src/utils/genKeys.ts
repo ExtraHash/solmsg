@@ -1,22 +1,45 @@
 import { Keypair } from "@solana/web3.js";
 import fs from "fs";
 import { KeyPairs } from "./KeyPairs";
+import path from "path";
+import os from "os";
 
 export function prepareKeys() {
-    if (!fs.existsSync("keys")) {
-        fs.mkdirSync("keys");
+    if (!fs.existsSync(path.resolve(os.homedir(), ".solwhisper"))) {
+        fs.mkdirSync(path.resolve(os.homedir(), ".solwhisper"));
     }
-    if (!fs.existsSync("keys/id.json")) {
+
+    if (!fs.existsSync(path.resolve(os.homedir(), ".solwhisper", "keys"))) {
+        fs.mkdirSync(path.resolve(os.homedir(), ".solwhisper", "keys"));
+    }
+    if (
+        !fs.existsSync(
+            path.resolve(os.homedir(), ".solwhisper", "keys", "id.json")
+        )
+    ) {
         const sendKeys = Keypair.generate();
         fs.writeFileSync(
-            "keys/id.json",
+            path.resolve(os.homedir(), ".solwhisper", "keys", "id.json"),
             JSON.stringify(Array.from(sendKeys.secretKey))
         );
-        console.log("Created private key file at keys/id.json");
+        console.log(`Created private key file at ${path.resolve(os.homedir(), ".solwhisper", "keys", "id.json")}`);
     }
 
     const keypair = Keypair.fromSecretKey(
-        Uint8Array.from(JSON.parse(fs.readFileSync("keys/id.json").toString()))
+        Uint8Array.from(
+            JSON.parse(
+                fs
+                    .readFileSync(
+                        path.resolve(
+                            os.homedir(),
+                            ".solwhisper",
+                            "keys",
+                            "id.json"
+                        )
+                    )
+                    .toString()
+            )
+        )
     );
 
     return new KeyPairs(keypair);
