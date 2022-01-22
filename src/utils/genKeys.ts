@@ -22,7 +22,14 @@ export function prepareKeys() {
             path.resolve(os.homedir(), ".solwhisper", "keys", "id.json"),
             JSON.stringify(Array.from(sendKeys.secretKey))
         );
-        console.log(`Created private key file at ${path.resolve(os.homedir(), ".solwhisper", "keys", "id.json")}`);
+        console.log(
+            `Created private key file at ${path.resolve(
+                os.homedir(),
+                ".solwhisper",
+                "keys",
+                "id.json"
+            )}`
+        );
     }
 
     const keypair = Keypair.fromSecretKey(

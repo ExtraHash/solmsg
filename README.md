@@ -5,6 +5,7 @@ whisper, an application for sending end to end encrypted messages through the So
 currently operating on devnet only, please do not send mainnet funds to your whisper address
 
 to install and run:
+
 ```
 npm i -g solwhisper
 solwhisper

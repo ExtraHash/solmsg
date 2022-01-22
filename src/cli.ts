@@ -46,7 +46,20 @@ async function main() {
         console.warn(
             "Your SOL balance is 0. Pease get some devnet SOL here: https://solfaucet.com/"
         );
-        process.exit(0);
+        const spinner = ora("Waiting for wallet to be funded").start();
+
+        while (true) {
+            const newBalance = await solana.getBalance(idKeys.edKeys.publicKey);
+            if (newBalance > 0) {
+                spinner.succeed(
+                    "Wallet funded. Balance: " +
+                        (newBalance / LAMPORTS_PER_SOL).toFixed(4) +
+                        " SOL"
+                );
+                break;
+            }
+            await sleep(2000);
+        }
     } else {
         console.log(
             "Balance: " + (balance / LAMPORTS_PER_SOL).toFixed(4) + " SOL"
@@ -84,6 +97,7 @@ async function main() {
                     sendResponse.to,
                     sendResponse.message
                 );
+
                 break;
             case "read":
                 const pastMessages = await getRepository(Whisper).find();
@@ -135,20 +149,11 @@ async function getMessages(idKeys: KeyPairs) {
             }
         );
 
-        const found: Whisper[] = [];
+        const found: Partial<Whisper>[] = [];
 
         if (res.length > 0) {
             for (const txDetails of res) {
                 try {
-                    // check if message is already in database
-                    const checkMsg = await getRepository(Whisper).findOne(
-                        txDetails.signature
-                    );
-                    if (checkMsg !== undefined) {
-                        // message already stored
-                        continue;
-                    }
-
                     const tx = await solana.getTransaction(txDetails.signature);
                     const logMsg = (tx as any).meta.logMessages[1];
                     const msg: string = logMsg.split('"')[1];
@@ -181,17 +186,19 @@ async function getMessages(idKeys: KeyPairs) {
                             throw new Error("Message not decrypted properly");
                         }
 
-                        const msgDetails: Whisper = {
+                        const msgDetails: Partial<Whisper> = {
                             signature: txDetails.signature,
                             from: sendEdPubkey.toBase58(),
+                            to: idKeys.edKeys.publicKey.toBase58(),
                             at: new Date(tx?.blockTime! * 1000).getTime(),
                             message: decodeUtf8(decryptedMsg),
+                            direction: "incoming",
                         };
                         await getRepository(Whisper).insert(msgDetails);
                         found.push(msgDetails);
                     }
                 } catch (error) {
-                    // log.warn(error);
+                    // console.error(error);
                 }
             }
             lastSeen!.signature = res[0].signature;
@@ -204,11 +211,11 @@ async function getMessages(idKeys: KeyPairs) {
     }
 }
 
-function printMessages(messages: Whisper[]) {
+function printMessages(messages: Partial<Whisper>[]) {
     for (const m of messages.sort((a, b) => {
-        if (a.at > b.at) {
+        if (a.at! > b.at!) {
             return 1;
-        } else if (a.at < b.at) {
+        } else if (a.at! < b.at!) {
             return -1;
         }
         return 0;
@@ -217,13 +224,17 @@ function printMessages(messages: Whisper[]) {
     }
 }
 
-function printMessage(msg: Whisper) {
-    console.log("------------------");
+function printMessage(msg: Partial<Whisper>) {
+    if (msg.direction === "incoming") {
+        console.log("---------RECIEVED---------");
+    } else {
+        console.log("-----------SENT-----------");
+    }
     console.log("From: " + msg.from);
-    console.log("At: " + new Date(msg.at).toLocaleString());
+    console.log("At: " + new Date(msg.at as number).toLocaleString());
     console.log();
     console.log(msg.message);
-    console.log("------------------");
+    console.log("--------------------------");
 }
 
 async function sendMessage(
@@ -257,6 +268,8 @@ async function sendMessage(
             data: Buffer.from(msg),
         });
 
+        const sentTime = new Date(Date.now()).getTime();
+
         const transaction = new Transaction().add(instruction);
 
         const signature = await sendAndConfirmTransaction(
@@ -271,6 +284,16 @@ async function sendMessage(
         spinner.succeed(
             `Message sent, transaction: https://explorer.solana.com/tx/${signature}?cluster=devnet`
         );
+
+        const msgDetails: Partial<Whisper> = {
+            signature,
+            from: idKeys.edKeys.publicKey.toBase58(),
+            to: receiver,
+            at: sentTime,
+            message,
+            direction: "outgoing",
+        };
+        await getRepository(Whisper).insert(msgDetails);
     } catch (error: any) {
         spinner.fail(error.toString());
     }

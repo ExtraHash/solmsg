@@ -1,17 +1,31 @@
-import { Entity, Column, Unique, PrimaryColumn } from "typeorm";
+import {
+    Entity,
+    Column,
+    Unique,
+    PrimaryColumn,
+    PrimaryGeneratedColumn,
+} from "typeorm";
 
 @Entity()
-@Unique(["signature"])
 export class Whisper {
-    @PrimaryColumn({ type: "varchar" })
+    @PrimaryGeneratedColumn("increment")
+    id!: number;
+
+    @Column({ type: "varchar" })
     signature!: string;
 
     @Column({ type: "varchar" })
     from!: string;
+
+    @Column({ type: "varchar" })
+    to!: string;
 
     @Column({ type: "int" })
     at!: number;
 
     @Column({ type: "varchar" })
     message!: string;
+
+    @Column({ type: "varchar" })
+    direction!: "outgoing" | "incoming";
 }
