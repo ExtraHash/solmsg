@@ -232,10 +232,11 @@ function printMessages(messages: Partial<Whisper>[]) {
 function printMessage(msg: Partial<Whisper>) {
     if (msg.direction === "incoming") {
         console.log("---------RECIEVED---------");
+        console.log("From: " + msg.from);
     } else {
         console.log("-----------SENT-----------");
+        console.log("To: " + msg.to);
     }
-    console.log("From: " + msg.from);
     console.log("At: " + new Date(msg.at as number).toLocaleString());
     console.log();
     console.log(msg.message);
