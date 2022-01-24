@@ -25,10 +25,13 @@ import ora from "ora";
 import { LastSeen } from "./entities/LastSeen";
 import os from "os";
 
+// tslint:disable-next-line: no-var-requires
+const packageJson = require("../package.json");
+
 async function main() {
     console.log(ASCII);
 
-    console.log(`whisper version ${process.env.npm_package_version}`);
+    console.log(`whisper version ${packageJson.version}`);
 
     // get db conn
     const connection = await createConnection({
