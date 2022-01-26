@@ -24,6 +24,7 @@ import prompts from "prompts";
 import ora from "ora";
 import { LastSeen } from "./entities/LastSeen";
 import os from "os";
+import chalk from "chalk";
 
 // tslint:disable-next-line: no-var-requires
 const packageJson = require("../package.json");
@@ -51,6 +52,7 @@ async function main() {
         console.warn(
             "Your SOL balance is 0. Pease get some devnet SOL here: https://solfaucet.com/"
         );
+        console.warn(chalk.yellow.bold("WARNING: ") + "Whisper is currently operating on devnet. Please DO NOT send mainnet funds to your address.")
         const spinner = ora("Waiting for wallet to be funded").start();
 
         while (true) {
